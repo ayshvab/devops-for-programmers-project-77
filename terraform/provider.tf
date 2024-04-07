@@ -1,8 +1,13 @@
 terraform {
+  
   required_providers {
     tencentcloud = {
       source  = "tencentcloudstack/tencentcloud"
       version = "1.81.86"
+    }
+    digitalocean = {
+      source  = "digitalocean/digitalocean"
+      version = "2.36.0"
     }
   }
 
@@ -19,13 +24,17 @@ provider "tencentcloud" {
   secret_key = var.tencentcloud_secret_key
 }
 
-data "tencentcloud_user_info" "info" {}
-
-locals {
-  app_id = data.tencentcloud_user_info.info.app_id
+provider "digitalocean" {
+  token = var.do_token
 }
 
+# Terraform Backend
+data "tencentcloud_user_info" "info" {}
+
 resource "tencentcloud_cos_bucket" "private_sbucket" {
-  bucket            = "hexlet-bucket-${local.app_id}"
+  bucket            = "hexlet-bucket-${data.tencentcloud_user_info.info.app_id}"
   versioning_enable = false
+  lifecycle {
+    prevent_destroy = true
+  }
 }

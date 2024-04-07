@@ -13,6 +13,7 @@ tmp/*
 .vscode
 .terraform
 secret.*
+!secret.*.j2
 *.backup
 *.tfstate
 *.tfstate.*
