@@ -8,6 +8,10 @@
         rule: allow
         port: '80'
         proto: tcp
+    - name: Setup Datadog Agent
+      tags: setup
+      import_role:
+        name: datadog.dd.agent
     - name: Deploy
       tags: deploy
       community.docker.docker_container:

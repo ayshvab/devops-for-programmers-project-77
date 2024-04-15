@@ -1,0 +1,6 @@
+---
+datadog_site: "us5.datadoghq.com"
+# datadog_apm_instrumentation_enabled: "all"
+ssh_public_key_file: "~/.ssh/do_hexlet_devops.pub"
+ssh_private_key_file: "~/.ssh/do_hexlet_devops"
+

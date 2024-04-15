@@ -8,6 +8,20 @@ variable "tencentcloud_secret_key" {
   sensitive = true
 }
 
+variable "datadog_api_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "datadog_app_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "datadog_api_url" {
+  type = string
+}
+
 variable "do_name" {
   type        = string
   description = "Infrastructure project name"

@@ -9,6 +9,10 @@ terraform {
       source  = "digitalocean/digitalocean"
       version = "2.36.0"
     }
+    datadog = {
+      source = "DataDog/datadog"
+      version = "3.38.0"
+    }
   }
  
   backend "cos" {
@@ -26,6 +30,12 @@ provider "tencentcloud" {
 
 provider "digitalocean" {
   token = var.do_token
+}
+
+provider "datadog" {
+  api_key = var.datadog_api_key
+  api_url = var.datadog_api_url
+  app_key = var.datadog_app_key
 }
 
 # Terraform Backend

@@ -245,3 +245,49 @@ resource "local_file" "tf_ansible_vars_file" {
 #   filename = "../tmp/db_prepared_ssl_cert"
 #   file_permission = "0644"
 # }
+
+resource "datadog_synthetics_test" "beacon" {
+  type    = "api"
+  subtype = "http"
+
+  request_definition {
+    method = "GET"
+    url    = "https://${var.subdomain_name}.${digitalocean_domain.default.name}"
+  }
+
+  assertion {
+    type     = "statusCode"
+    operator = "is"
+    target   = "200"
+  }
+
+  locations = ["aws:us-west-2"]
+  options_list {
+    tick_every          = 900
+    min_location_failed = 1
+  }
+
+  name    = "Beacon API Check"
+  message = "Oh no! Light from the Beacon app is no longer shining!"
+  tags    = ["app:beacon"]
+
+  status = "live"
+}
+
+resource "datadog_monitor" "http_ok" {
+  name = "Web server is responsive"
+  type = "service check"
+  query = "\"datadog.agent.up\".over(\"*\").by(\"*\").last(2).count_by_status()"
+  message = ""
+  monitor_thresholds {
+    critical = 1
+    warning = 1
+    ok = 1
+  }
+  notify_audit = false
+  notify_no_data = true
+  no_data_timeframe = 2
+  renotify_interval = 0
+  timeout_h = 0
+  include_tags = false
+}
