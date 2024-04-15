@@ -30,9 +30,6 @@ resource "digitalocean_droplet" "web" {
   # TODO Try provisioning with Ansible
   provisioner "remote-exec" {
     inline = [
-      "export PATH=$PATH:/usr/bin",
-      "sudo apt update",
-      "sudo apt install -y nginx",
       "ufw allow 80/tcp"
     ]
   }
@@ -146,6 +143,24 @@ resource "digitalocean_firewall" "web" {
   }
 }
 
+resource "digitalocean_database_cluster" "postgres_cluster" {
+  name = "${var.do_name}-database-cluster"
+  engine = "pg"
+  version = "15"
+  size = var.database_size
+  region = var.do_region
+  node_count = var.database_count
+  private_network_uuid = digitalocean_vpc.web.id
+}
+
+resource "digitalocean_database_firewall" "postgres_cluster_firewall" {
+  cluster_id = digitalocean_database_cluster.postgres_cluster.id
+  rule {
+    type = "tag"
+    value = "${var.do_name}-webserver"
+  }
+}
+
 resource "digitalocean_droplet" "bastion" {
   image    = var.droplet_image
   name     = "bastion-${var.do_name}-${var.do_region}"
@@ -167,6 +182,10 @@ resource "digitalocean_record" "bastion" {
   ttl    = 300
 }
 
+output "bastion_record" {
+  value = digitalocean_record.bastion.fqdn
+}
+
 resource "digitalocean_firewall" "bastion" {
   name        = "${var.do_name}-only-ssh-bastion"
   droplet_ids = [digitalocean_droplet.bastion.id]
@@ -186,3 +205,43 @@ resource "digitalocean_firewall" "bastion" {
   }
 }
 
+data "digitalocean_database_cluster" "postgres_cluster" {
+  name = digitalocean_database_cluster.postgres_cluster.name
+}
+
+data "digitalocean_database_ca" "ca" {
+  cluster_id = digitalocean_database_cluster.postgres_cluster.id
+}
+
+resource "local_file" "ansible_inventory" {
+  content = templatefile("./templates/inventory.tmpl", {
+    web_droplets = digitalocean_droplet.web.*
+    bastion_droplet = digitalocean_droplet.bastion
+  })
+  filename = "../ansible/production/inventory.ini"
+}
+
+resource "local_file" "ssh_cfg" {
+  content = templatefile("./templates/ssh_config.tmpl", {
+    bastion_droplet = digitalocean_droplet.bastion
+  })
+  filename = "../ssh.cfg"
+  file_permission = "0644"
+}
+
+resource "local_file" "tf_ansible_vars_file" {
+  content = <<-DOC
+    db_name: ${digitalocean_database_cluster.postgres_cluster.database}
+    db_host: ${digitalocean_database_cluster.postgres_cluster.private_host}
+    db_port: "${digitalocean_database_cluster.postgres_cluster.port}"
+    db_user: ${digitalocean_database_cluster.postgres_cluster.user}
+  DOC
+  filename = "../ansible/production/group_vars/all/tf_ansible_vars_file.yml"
+  file_permission = "0644"
+}
+
+# resource "local_sensitive_file" "db_prepared_ssl_cert" {
+#   content = "${replace(data.digitalocean_database_ca.ca.certificate, "/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----|\n|[[:space:]]/", "")}"
+#   filename = "../tmp/db_prepared_ssl_cert"
+#   file_permission = "0644"
+# }

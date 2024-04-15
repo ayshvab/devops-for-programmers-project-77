@@ -10,10 +10,10 @@ terraform {
       version = "2.36.0"
     }
   }
-
+ 
   backend "cos" {
     region = "ap-guangzhou"
-    bucket = "hexlet-bucket-1325533337"
+    bucket = "hexlet-bucket-05-1325533337"
     prefix = "terraform/state"
   }
 }
@@ -31,10 +31,14 @@ provider "digitalocean" {
 # Terraform Backend
 data "tencentcloud_user_info" "info" {}
 
-resource "tencentcloud_cos_bucket" "private_sbucket" {
-  bucket            = "hexlet-bucket-${data.tencentcloud_user_info.info.app_id}"
-  versioning_enable = false
-  lifecycle {
-    prevent_destroy = true
-  }
+output "tencentcloud_user_info" {
+  value = data.tencentcloud_user_info.info.app_id
+}
+
+resource "tencentcloud_cos_bucket" "bucket" {
+  bucket            = "hexlet-bucket-05-${data.tencentcloud_user_info.info.app_id}"
+  versioning_enable = true
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }

@@ -1,0 +1,4 @@
+db_name: defaultdb
+db_host: private-hexlet-devops-prod-database-cluster-do-user-12042333-0.c.db.ondigitalocean.com
+db_port: "25060"
+db_user: doadmin

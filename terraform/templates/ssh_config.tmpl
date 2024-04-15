@@ -1,0 +1,12 @@
+Host *
+     User root
+     ForwardAgent no
+     StrictHostKeyChecking accept-new
+     ControlMaster auto
+     ControlPersist 2m
+     ControlPath ~/.ssh/ansible-hexlet-devops-%r@%h:%p
+     ProxyCommand ssh -W %h:%p ${bastion_droplet.ipv4_address}
+
+Host bastion1
+     HostName ${bastion_droplet.ipv4_address}
+     ProxyCommand none

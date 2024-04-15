@@ -2,10 +2,13 @@
 
 - hosts: localhost
   gather_facts: false
+  ansible_connection: local
   tasks:
-    - template:
+    - name: Generate Terraform Infra vars
+      template:
         src: secret.auto.tfvars.j2
         dest: '../terraform/secret.auto.tfvars'
-    - template:
+    - name: Generate Terraform Backend vars
+      template:
         src: secret.backend.tfvars.j2
         dest: '../terraform/secret.backend.tfvars'

@@ -1,0 +1,27 @@
+---
+
+- hosts: webservers
+  tasks:
+    - name: UFW Allow all access to tcp port 80
+      tags: setup
+      community.general.ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+    - name: Deploy
+      tags: deploy
+      community.docker.docker_container:
+        name: wiki
+        image: requarks/wiki:2
+        state: started
+        ports:
+          - 80:3000
+        env:
+          DB_TYPE: "postgres"
+          DB_SSL: "1"
+          DB_SSL_CA: "{{ db_prepared_ssl_cert }}"
+          DB_NAME: "{{ db_name }}"
+          DB_HOST: "{{ db_host }}"
+          DB_PORT: "{{ db_port }}"
+          DB_USER: "{{ db_user }}"
+          DB_PASS: "{{ db_pass }}"

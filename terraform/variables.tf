@@ -8,16 +8,6 @@ variable "tencentcloud_secret_key" {
   sensitive = true
 }
 
-# variable "alicloud_access_key_id" {
-#   type = string
-#   sensitive = true
-# }
-
-# variable "alicloud_access_key_secret" {
-#   type = string
-#   sensitive = true
-# }
-
 variable "do_name" {
   type        = string
   description = "Infrastructure project name"
@@ -71,4 +61,14 @@ variable "domain_name" {
 variable "subdomain_name" {
   type    = string
   default = "devops"
+}
+
+variable "database_count" {
+  type = number
+  default = 1
+}
+
+variable "database_size" {
+  type = string
+  default = "db-s-1vcpu-1gb"
 }

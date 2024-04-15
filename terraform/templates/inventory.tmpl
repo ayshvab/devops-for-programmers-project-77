@@ -1,0 +1,9 @@
+[webservers]
+%{ for index, web_droplet in web_droplets ~}
+web${index} ansible_host=${web_droplet.ipv4_address_private}
+%{endfor ~}
+
+[webservers:vars]
+ansible_user=root
+ansible_ssh_common_args='-C -F ./ssh.cfg'
+
